@@ -1,6 +1,6 @@
 Dataset **Tree Species Detection** can be downloaded in [Supervisely format](https://developer.supervisely.com/api-references/supervisely-annotation-json-format):
 
- [Download](Set 'HIDE_DATASET=False' to generate download link)
+ [Download](https://assets.supervisely.com/supervisely-supervisely-assets-public/teams_storage/1/k/je/CNR07Mpv9hp9ei7XwepW3Z89Yijr7w9HKlNxLVSLZgabxbntO9JFFzdV4CmjR5dgU2gUCKYB5GNahbSKAR6d9SKWcoutlu7royIToKEmVUOrjLXe2mUAvp1m1NPR.tar)
 
 As an alternative, it can be downloaded with *dataset-tools* package:
 ``` bash
