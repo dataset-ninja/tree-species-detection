@@ -1,12 +1,26 @@
-import supervisely as sly
-import os
-from dataset_tools.convert import unpack_if_archive
-import src.settings as s
-from urllib.parse import unquote, urlparse
-from supervisely.io.fs import get_file_name, get_file_size
-import shutil
+# https://sites.google.com/view/geomatics-and-computer-vision/home/datasets
 
+import glob
+import os
+import shutil
+import xml.etree.ElementTree as ET
+from urllib.parse import unquote, urlparse
+
+import numpy as np
+import supervisely as sly
+from dataset_tools.convert import unpack_if_archive
+from dotenv import load_dotenv
+from supervisely.io.fs import (
+    file_exists,
+    get_file_ext,
+    get_file_name,
+    get_file_name_with_ext,
+    get_file_size,
+)
 from tqdm import tqdm
+
+import src.settings as s
+
 
 def download_dataset(teamfiles_dir: str) -> str:
     """Use it for large datasets to convert them on the instance"""
@@ -29,7 +43,7 @@ def download_dataset(teamfiles_dir: str) -> str:
             total=fsize,
             unit="B",
             unit_scale=True,
-        ) as pbar:        
+        ) as pbar:
             api.file.download(team_id, teamfiles_path, local_path, progress_cb=pbar)
         dataset_path = unpack_if_archive(local_path)
 
@@ -57,7 +71,8 @@ def download_dataset(teamfiles_dir: str) -> str:
 
         dataset_path = storage_dir
     return dataset_path
-    
+
+
 def count_files(path, extension):
     count = 0
     for root, dirs, files in os.walk(path):
@@ -65,21 +80,81 @@ def count_files(path, extension):
             if file.endswith(extension):
                 count += 1
     return count
-    
+
+
 def convert_and_upload_supervisely_project(
     api: sly.Api, workspace_id: int, project_name: str
 ) -> sly.ProjectInfo:
-    ### Function should read local dataset and upload it to Supervisely project, then return project info.###
-    raise NotImplementedError("The converter should be implemented manually.")
+    # project_name = "Tree species detection"
+    dataset_path = "/mnt/c/Users/grokh/Downloads/Cumbaru"
+    batch_size = 5
+    images_ext = ".jpg"
+    ann_ext = ".xml"
 
-    # dataset_path = "/local/path/to/your/dataset" # general way
-    # dataset_path = download_dataset(teamfiles_dir) # for large datasets stored on instance
+    def create_ann(image_path):
+        labels = []
 
-    # ... some code here ...
+        curr_bboxes_path = image_path[: -len(get_file_name_with_ext(image_path))]
 
-    # sly.logger.info('Deleting temporary app storage files...')
-    # shutil.rmtree(storage_dir)
+        ann_path = os.path.join(curr_bboxes_path, get_file_name(image_path) + ".xml")
 
-    # return project
+        tree = ET.parse(ann_path)
+        root = tree.getroot()
+        img_height = int(root.find(".//height").text)
+        img_width = int(root.find(".//width").text)
+        objects_content = root.findall(".//object")
+        for obj_data in objects_content:
+            bndbox = obj_data.find(".//bndbox")
+            top = int(bndbox.find(".//ymin").text)
+            left = int(bndbox.find(".//xmin").text)
+            bottom = int(bndbox.find(".//ymax").text)
+            right = int(bndbox.find(".//xmax").text)
 
+            rectangle = sly.Rectangle(top=top, left=left, bottom=bottom, right=right)
+            label = sly.Label(rectangle, obj_class)
+            labels.append(label)
 
+        # tag_name = image_path.split("/")[-3]  # for example
+        # tags = [sly.Tag(tag_meta) for tag_meta in tag_metas if tag_meta.name == tag_name]
+
+        return sly.Annotation(img_size=(img_height, img_width), labels=labels)
+
+    obj_class = sly.ObjClass("cumbaru", sly.Rectangle)
+
+    project = api.project.create(workspace_id, project_name, change_name_if_conflict=True)
+
+    # tag_names = ["folder_0", "folder_1", "folder_2", "folder_3", "folder_4"]
+    # tag_metas = [sly.TagMeta(name, sly.TagValueType.NONE) for name in tag_names]
+
+    meta = sly.ProjectMeta(obj_classes=[obj_class])
+    api.project.update_meta(project.id, meta.to_json())
+
+    for ds_name in ["train", "val", "test"]:
+        dataset = api.dataset.create(project.id, ds_name, change_name_if_conflict=True)
+
+        unique_pathes = []
+        unique_images_names = []
+
+        images_pathes = glob.glob(dataset_path + f"/*/{ds_name}/*.JPG")
+
+        for curr_path in images_pathes:
+            im_name = get_file_name_with_ext(curr_path)
+            if im_name not in unique_images_names:
+                unique_images_names.append(im_name)
+                unique_pathes.append(curr_path)
+
+        progress = sly.Progress("Create dataset {}".format(ds_name), len(unique_pathes))
+
+        for img_pathes_batch in sly.batched(unique_pathes, batch_size=batch_size):
+            images_names_batch = [
+                get_file_name_with_ext(image_path) for image_path in img_pathes_batch
+            ]
+
+            img_infos = api.image.upload_paths(dataset.id, images_names_batch, img_pathes_batch)
+            img_ids = [im_info.id for im_info in img_infos]
+
+            anns = [create_ann(image_path) for image_path in img_pathes_batch]
+            api.annotation.upload_anns(img_ids, anns)
+
+            progress.iters_done_report(len(images_names_batch))
+    return project
