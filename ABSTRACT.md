@@ -6,9 +6,16 @@ To the best of the authors' knowledge, no prior research has centered on the app
 
 The experimental process unfolded in four primary phases. Firstly, RGB images were acquired at various points throughout the year using a UAV-based camera. A specialist was tasked with annotating these images by delineating cumbaru trees using bounding boxes. Subsequently, the networks associated with each method were trained to detect instances of cumbaru trees within a designated set of training images. In the third step, the trained networks were applied to images not included in the training dataset, with the objective of predicting the presence of cumbaru trees and producing corresponding bounding boxes. The final phase involved the computation of accuracy metrics for each method based on the predicted outcomes.
 
-A total of 392 UAV images (<i>Please note, that datasetninja holds newer updated version of the dataset with 712 images</i>) were procured over a seven-month period, spanning from August 2018 to February 2019, across six missions. The advanced Phantom 4 UAV, equipped with a 20-megapixel camera, captured these images at flight altitudes ranging from 20 to 40 meters (refer to Table 1 for comprehensive details). These images exhibited a mean Ground Sample Distance (GSD) of 0.82 cm (centimeters) and were acquired within three distinct study regions, encompassing a total area of approximately 150,000.00 square meters, situated in the urban domain of Campo Grande municipality, Mato Grosso do Sul, Brazil. These missions collectively encompassed around 110 trees, each captured with variations in appearance, scale, and illumination:
+
+| Aircraft |  Sensor  | Field of View | Nominal Focal Length |  Image Size  | Mean GSD | Mean Flight Height |
+| :--------: | :--------: | :-------------: | :--------------------: | :------------: | :--------: | :------------------: |
+| Phantom4 | 1” CMOS |     84°     |        8.8 mm        | 5472 × 3648 | 0.82 cm |        30 m        |
+| Advanced |         |               |                     |   (20 Mp)   |         |                   |
+
+A total of 392 UAV images (<i>Please note, that datasetninja holds an updated version of the dataset with 712 images</i>) were procured over a seven-month period, spanning from August 2018 to February 2019, across six missions. The advanced Phantom 4 UAV, equipped with a 20-megapixel camera, captured these images at flight altitudes ranging from 20 to 40 meters (refer to Table 1 for comprehensive details). These images exhibited a mean Ground Sample Distance (GSD) of 0.82 cm (centimeters) and were acquired within three distinct study regions, encompassing a total area of approximately 150,000.00 square meters, situated in the urban domain of Campo Grande municipality, Mato Grosso do Sul, Brazil. These missions collectively encompassed around 110 trees, each captured with variations in appearance, scale, and illumination:
 
 <img src="https://github.com/dataset-ninja/tree-species-detection/assets/78355358/2ea79b6d-d2ec-49f4-be4a-b98c0b8be370" alt="image" width="800">
+
 <i>Examples from the dataset: images captured on: (a) 26 August 2018; (b) 21 September 2018; (c) 22 September 2018; and (d) 20 February 2019</i>
 
 Each image within the dataset underwent meticulous annotation by a specialist employing [LabelMe software](https://github.com/wkentaro/labelme). During this annotation process, a bounding box delineated by the top-left and bottom-right corners was assigned to each cumbaru tree specimen present in the image.
