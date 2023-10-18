@@ -20,7 +20,7 @@ HIDE_DATASET = False  # set False when 100% sure about repo quality
 ##################################
 # * After uploading to instance ##
 ##################################
-LICENSE: License = License.CC_BY_4_0()
+LICENSE: License = License.CC_BY_4_0(source_url="https://www.mdpi.com/1424-8220/19/16/3595")
 APPLICATIONS: List[Union[Industry, Domain, Research]] = [Domain.Environmental()]
 CATEGORY: Category = Category.Environmental(extra=Category.Biology())
 
