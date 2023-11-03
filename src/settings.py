@@ -75,6 +75,7 @@ AUTHORS: Optional[List[str]] = [
     "Liesenberg, Veraldo",
     "Gonçalves, Wesley Nunes",
 ]
+AUTHORS_CONTACTS: Optional[List[str]] = ["jrmarcato@gmail.com", "wesley.goncalves@ufms.br"]
 
 ORGANIZATION_NAME: Optional[Union[str, List[str]]] = "BR-GER joint research group"
 ORGANIZATION_URL: Optional[Union[str, List[str]]] = "https://www.mdpi.com/1424-8220/19/16/3595"
@@ -128,6 +129,7 @@ def get_settings():
     settings["repository"] = REPOSITORY
     settings["citation_url"] = CITATION_URL
     settings["authors"] = AUTHORS
+    settings["authors_contacts"] = AUTHORS_CONTACTS
     settings["organization_name"] = ORGANIZATION_NAME
     settings["organization_url"] = ORGANIZATION_URL
     settings["slytagsplit"] = SLYTAGSPLIT
